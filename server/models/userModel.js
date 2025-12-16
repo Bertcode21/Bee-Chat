@@ -21,7 +21,7 @@ const userSchema = mongoose.Schema({
 
     profilePic: {
         type: String,
-        required: true
+        required: false
     }
 }, {timeStamp: true})
 const Users = mongoose.model("users", userSchema);

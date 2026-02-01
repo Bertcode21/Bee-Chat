@@ -1,7 +1,7 @@
 
 const mongoose = require('mongoose');
 
-mongoose.connect(process.env.local_conn_str);
+mongoose.connect(process.env.conn_str);
 
 const db = mongoose.connection;
 

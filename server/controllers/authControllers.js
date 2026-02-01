@@ -30,7 +30,8 @@ req.body.password = hashedpassword;
    console.log(newuser);
    res.send({
     message: "New User Created Succesfully",
-    sucess: true
+    sucess: true,
+    newuser
    })
  }catch(error){
   res.send({

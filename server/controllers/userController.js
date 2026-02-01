@@ -25,7 +25,13 @@ exports.GetLoggedUser = asyncErrorHandler( async (req, res )=>{
 
 exports.GetAllUsers = asyncErrorHandler( async (req, res )=>{ 
     try{
-
+    const userId = req.user.id || req.user.userId; // depending on how you stored it
+        const Alluser = await Users.find({_id: {$ne: userId}});
+    res.send({
+        message: "All users fetched successfully",
+        success: true,
+        data: Alluser
+      })
     }catch(error){
         res.send({
         message: "Error in fetching all users",

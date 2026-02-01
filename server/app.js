@@ -6,6 +6,7 @@ const app = express();
 
 const authRoutes = require('./routes/authRoutes')
 const userRoutes = require("./routes/userRoutes")
+const chatRoutes = require("./routes/chatRoutes")
 app.use(express.json())
 
 app.use(morgan('dev'))
@@ -20,5 +21,7 @@ res.send("Hello from the server")
 
 app.use('/api/auth',authRoutes)
 app.use('/api/user', userRoutes);
+app.use('/api/chat', chatRoutes);
+
 
 module.exports = app;

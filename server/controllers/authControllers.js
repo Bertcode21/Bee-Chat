@@ -19,12 +19,19 @@ exports.signup = asyncErrorHandler( async (req,res)=>{
     sucess: false
   })
     }
- 
-    ///3. encrypt password
+    ///3. if Length of password is less than 8
+     if(password.length < 8){
+      return res.status(401).send({
+        message: "Password must be at least 8 characters long",
+        success: false
+      })
+     }
+
+    ///4. encrypt password
 const hashedpassword = await bcrypt.hash(password, 10)
 req.body.password = hashedpassword;
 
-    ///4. save in database
+    ///5. save in database
    const newuser =  new Users(req.body);
    await newuser.save();
    console.log(newuser);
@@ -41,43 +48,53 @@ req.body.password = hashedpassword;
   })
  }
 })
-exports.login = asyncErrorHandler(async (req, res) =>{
-    try{
-        /// check if user exists
-  const user = await Users.findOne({ email: req.body.email})
-  if(!user){
-    res.send({
-        message: "OOps sorry the user does not exists",
+
+
+exports.login = asyncErrorHandler(async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await Users.findOne({ email }).select("+password");
+
+    if (!user) {
+      return res.send({
+        message: "Oops sorry the user does not exist",
         success: false
-    })
+      });
+    }
+
+    const isvalid = await bcrypt.compare(password, user.password);
+
+    if (!isvalid) {
+      return res.send({
+        message: "Password incorrect",
+        success: false
+      });
+    }
+
+    const token = jwt.sign(
+      { id: user._id }, // important: use id not userId
+      process.env.Secret_Key,
+      { expiresIn: "1d" }
+    );
+
+    res.send({
+      message: "User Logged in Successfully",
+      success: true,
+      token
+    });
+
+  } catch (error) {
+    console.log("Login error:", error);
+
+    res.status(500).json({
+      message: error.message,
+      success: false
+    });
   }
+});
 
-        // 2. check if user email and passowrd are correct
-      const isvalid = await bcrypt.compare(req.body.password, user.password)
-           if(!isvalid){
-         res.send({
-        message: "password incorrect",
-        success: false
-             })
-               }
-        /// 3. if user exists and password is correct anssign JWT.
 
-       const token =  jwt.sign({userId: user._id}, process.env.Secret_Key, {expiresIn: "1d"})
-    // console.log("user logged in")
-        res.send({
-            message: "User Logged in Succesfully",
-            success: true,
-            token: token
-        })
- }catch(error){
-    res.send({
-    message: "Error in Login",
-    success: false,
-   
-    
-  })
- }
-})
 
 exports.logout = asyncErrorHandler( async (req, res) =>{
         try{
